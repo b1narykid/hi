@@ -64,9 +64,10 @@ func init() {
 }
 
 func main() {
-
-	fs := http.FileServer(http.Dir(dir))
-	http.Handle("/", fs)
+	if wsdir != "/" {
+		fs := http.FileServer(http.Dir(dir))
+		http.Handle("/", fs)
+	}
 
 	http.HandleFunc(wsdir, makeWsHandler())
 
