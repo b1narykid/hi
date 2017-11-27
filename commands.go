@@ -8,7 +8,17 @@ import (
 
 type Command func(*Chatroom, *websocket.Conn, string, []string)
 
-var COMMANDS map[string]Command
+var commands = map[string]Command{
+	"/help":     listCommands,
+	"/list":     listUsers,
+	"/channels": listChannels,
+	"/join":     join,
+	"/leave":    leave,
+}
+
+func listCommands(room *Chatroom, ws *websocket.Conn, user string, args []string) {
+	ws.WriteJSON(room.ChannelMsg("avaibale commands: /help /list /channels /join /leave"))
+}
 
 func listUsers(room *Chatroom, ws *websocket.Conn, user string, args []string) {
 	ws.WriteJSON(room.ChannelMsg(strings.Join(room.Users(), ", ")))
@@ -48,14 +58,4 @@ func leave(room *Chatroom, ws *websocket.Conn, user string, args []string) {
 
 func WrongArgs(args []string) string {
 	return "Malformatted arguments: " + strings.Join(args, " ")
-}
-
-func init() {
-	// this avoids an initialization loop with joining
-	COMMANDS = map[string]Command{
-		"/list":     listUsers,
-		"/channels": listChannels,
-		"/join":     join,
-		"/leave":    leave,
-	}
 }

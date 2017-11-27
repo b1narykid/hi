@@ -21,7 +21,6 @@ type Message struct {
 }
 
 var rooms = make(map[string]*Chatroom)
-var DEFAULT_ROOM = "general"
 
 func (self *Chatroom) Send(msg Message) {
 	for client, ws := range self.Clients {
@@ -153,7 +152,7 @@ func handleMessages(usr string, ws *websocket.Conn) {
 		}
 
 		cmd := strings.Split(msg.Message, " ")
-		command, ok := COMMANDS[cmd[0]]
+		command, ok := commands[cmd[0]]
 
 		if ok {
 			command(room, ws, usr, cmd)

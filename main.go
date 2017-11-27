@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"log"
-	"strconv"
 	"strings"
 
 	"net/http"
@@ -21,7 +20,7 @@ func makeWsHandler() func(http.ResponseWriter, *http.Request) {
 		var usr string
 		chatroom := r.URL.Query()["room"]
 		username := r.URL.Query()["username"]
-		roomname := DEFAULT_ROOM
+		roomname := "general"
 
 		if len(chatroom) == 1 {
 			roomname = chatroom[0]
@@ -51,17 +50,27 @@ func makeWsHandler() func(http.ResponseWriter, *http.Request) {
 	}
 }
 
-func main() {
-	var port int
-	flag.IntVar(&port, "p", 8080, "the port to use")
-	flag.Parse()
+var (
+	addr  string
+	wsdir string
+	dir   string
+)
 
-	fs := http.FileServer(http.Dir("./public"))
+func init() {
+	flag.StringVar(&addr,  "p",    ":8080",  "addr to use")
+	flag.StringVar(&dir,   "root", "public", "http directory to serve")
+	flag.StringVar(&wsdir, "ws",   "/ws",    "websocket handler path")
+	flag.Parse()
+}
+
+func main() {
+
+	fs := http.FileServer(http.Dir(dir))
 	http.Handle("/", fs)
 
-	http.HandleFunc("/ws", makeWsHandler())
+	http.HandleFunc(wsdir, makeWsHandler())
 
-	err := http.ListenAndServe(":"+strconv.Itoa(port), nil)
+	err := http.ListenAndServe(addr, nil)
 
 	if err != nil {
 		log.Fatal("Server died with message:", err)
