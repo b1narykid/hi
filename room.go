@@ -17,7 +17,7 @@ type Message struct {
 	From    string
 	Room    string
 	Message string
-  Meta    bool
+	Meta    bool
 }
 
 var rooms = make(map[string]*Chatroom)
@@ -143,7 +143,7 @@ func handleMessages(usr string, ws *websocket.Conn) {
 			break
 		}
 
-    msg.Meta = false;
+		msg.Meta = false;
 
 		room, ok := rooms[msg.Room]
 
