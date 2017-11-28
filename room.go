@@ -159,6 +159,12 @@ func handleMessages(usr string, ws *websocket.Conn) {
 			continue
 		}
 
+		fromws, exists := room.Clients[msg.From]
+		if !exists || ws != fromws {
+			ws.WriteJSON(SystemMsg("use /nick to change nickname"))
+			continue
+		}
+
 		room.Send(msg)
 	}
 }
