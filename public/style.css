@@ -61,6 +61,9 @@ body {
 }
 
 #messages {
+  display: flex;
+  flex-direction: column-reverse;
+
   padding: 5px;
   padding-left: 1em;
   height: calc(100% - 130px);
