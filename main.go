@@ -16,7 +16,7 @@ func httpHandler(w http.ResponseWriter, r *http.Request, s *Server) {
 	name := q.Get("username")
 	if !UserNameIsValid(name) {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(errInvalidName.Error()))
+		w.Write([]byte(errErroneusNickname.Error()))
 		return
 	}
 
@@ -39,7 +39,7 @@ func httpHandler(w http.ResponseWriter, r *http.Request, s *Server) {
 	room := s.GetRoom("#general")
 	c.Join(room)
 
-	s.Handle(c)
+	s.HandleClient(c)
 }
 
 var (

@@ -14,8 +14,8 @@ document.getElementById("usr").onkeyup = function(e) {
 function join() {
   var username = document.getElementById("usr").value;
   var proto = location.protocol == "http:" ? "ws" : "wss";
-  var url = proto + "://" + window.location.host +
-            "/ws?username=" + encodeURIComponent(username);
+  var host = window.location.host
+  var url = proto + "://" +  host + "/ws?username=" + encodeURIComponent(username);
   var ws = new WebSocket(url);
   window.onbeforeunload = function() { ws.close() };
 
@@ -34,30 +34,27 @@ function join() {
       var node = document.createElement("p");
 
       var k = document.createElement("span");
-      k.setAttribute("class", msg["Meta"] ? "channel" : "user");
-      k.appendChild(document.createTextNode(msg["From"]));
+      k.setAttribute("class", msg["Prefix"] ? "channel" : "user");
+      k.appendChild(document.createTextNode(msg["Prefix"]));
       node.appendChild(k);
 
       node.appendChild(document.createTextNode(' '));
 
       var v = document.createElement("span");
       v.setAttribute("class", "message");
-      v.appendChild(document.createTextNode(msg["Message"]));
+      v.appendChild(document.createTextNode(msg["Params"]));
       node.appendChild(v);
 
       prependChild(msgs, node);
     };
 
     var roomInsert = document.getElementById("room");
-
     document.getElementById("send").onkeyup = function(e) {
       if (e.keyCode == 13) {
         ws.send(
           JSON.stringify({
-              From: username,
-              Message: e.target.value,
-              Room: roomInsert.value,
-              Meta: false,
+              Command: "privmsg",
+              Params: [roomInsert.value, e.target.value],
           })
         );
         e.target.value = "";

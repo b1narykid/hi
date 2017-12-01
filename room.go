@@ -34,9 +34,9 @@ func (r *Room) Write(msg Message) error {
 
 func (r *Room) Compose(text string) Message {
 	return Message{
-		From: r.Name,
-		Message: text,
-		Meta: true,
+		Prefix: r.Name,
+		Command: "privmsg",
+		Params: []string{text},
 	}
 }
 

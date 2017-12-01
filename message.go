@@ -1,8 +1,8 @@
 package main
 
 type Message struct {
-	From    string
-	Room    string
-	Message string
-	Meta    bool
+	Tags    map[string]*string
+	Prefix  string
+	Command string
+	Params  []string
 }

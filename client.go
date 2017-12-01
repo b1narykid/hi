@@ -24,9 +24,9 @@ func (c *Client) Write(msg Message) error {
 
 func (c *Client) Compose(text string) Message {
 	return Message{
-		From: c.Name,
-		Message: text,
-		Meta: false,
+		Prefix: c.Name,
+		Command: "privmsg",
+		Params: []string{text},
 	}
 }
 
@@ -39,12 +39,6 @@ func (c *Client) Leave(r *Room) error {
 
 	delete(c.Rooms, rid)
 	return r.Unsubscribe(c)
-}
-
-func (c *Client) LeaveAll() {
-	for _, r := range c.Rooms {
-		c.Leave(r)
-	}
 }
 
 func (c *Client) Join(r *Room) error {

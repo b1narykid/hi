@@ -3,7 +3,6 @@ package main
 import (
 	"net"
 	"log"
-	"strings"
 	"github.com/gorilla/websocket"
 )
 
@@ -48,6 +47,7 @@ func (s *Server) DelRoom(r *Room) error {
 	return nil
 }
 
+// Get room with name. Create one if no such room exists.
 func (s *Server) GetRoom(n string) *Room {
 	r, ok := s.Rooms[n]
 	if !ok {
@@ -56,6 +56,12 @@ func (s *Server) GetRoom(n string) *Room {
 	}
 
 	return r
+}
+
+func (s *Server) DestroyIfEmpty(r *Room) {
+	if r.IsEmpty() {
+		delete(s.Rooms, r.Name)
+	}
 }
 
 func (s *Server) AddUser(c *Client) error {
@@ -78,6 +84,15 @@ func (s *Server) DelUser(c *Client) error {
 	return nil
 }
 
+func (s *Server) RemoveUser(c *Client) error {
+	for _, r := range c.Rooms {
+		c.Leave(r)
+		s.DestroyIfEmpty(r)
+	}
+
+	return s.DelUser(c)
+}
+
 func (s *Server) Nick(a, b string) error {
 	if _, ok := s.Users[b]; ok {
 		return errUserExists
@@ -95,9 +110,9 @@ func (s *Server) Nick(a, b string) error {
 
 func (s *Server) Compose(text string) Message {
 	return Message{
-		From: s.Name,
-		Message: text,
-		Meta: true,
+		Prefix: s.Name,
+		Command: "privmsg",
+		Params: []string{text},
 	}
 }
 
@@ -110,39 +125,24 @@ func (s *Server) RoomNames() []string {
 	return rs
 }
 
-func (s *Server) Handle(c *Client) {
+func (s *Server) HandleClient(c *Client) {
 	ws := c.Conn
 	defer ws.Close()
 
 	for {
-		var m Message
-		err := ws.ReadJSON(&m)
-		if err != nil {
-			c.LeaveAll()
-			s.DelUser(c)
+		m := &Message{}
+		if err := ws.ReadJSON(m); err != nil {
+			s.RemoveUser(c)
 			if isCloseError(err) {
 				log.Printf("error: " + err.Error())
 			}
 			break
 		}
 
-		m.Meta = false
-		m.From = c.Name
-
-		r, ok := s.Rooms[m.Room]
-		if !ok {
-			sysMsg := s.Compose(m.Room + " room does not exist.")
-			c.Write(sysMsg)
+		if command, ok := commands[m.Command]; ok {
+			command(s, c, *m)
 			continue
 		}
-
-		cmd := strings.SplitN(m.Message, " ", 2)
-		if command, ok := commands[cmd[0]]; ok {
-			command(s, r, c, cmd)
-			continue
-		}
-
-		r.Write(m)
 	}
 }
 

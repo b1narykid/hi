@@ -2,9 +2,13 @@ package main
 
 import "strings"
 
-type Command func(*Server, *Room, *Client, []string)
+type Command func(*Server, *Client, Message)
 
 var commands = map[string]Command{
+	"join": join,
+	"privmsg": privmsg,
+	"channels": channels,
+/*
 	"/help":     help,
 	"/who":      who,
 	"/channels": channels,
@@ -13,13 +17,81 @@ var commands = map[string]Command{
 	"/leave":    leave,
 	"/whoami":   whoami,
 	"/whois":    whois,
+*/
 }
-
-const cmds = "available commands: /help /who /channels /nick /join /leave /whoami /whois"
 
 func wrongArgs(args []string) string {
-	return "Malformatted arguments: " + strings.Join(args, " ")
+	return "Malformatted parameters " + strings.Join(args, " ")
 }
+
+func privmsg(s *Server, c *Client, m Message) {
+	if len(m.Params) < 1 {
+		c.Write(s.Compose(errNoRecipient.Error()))
+		return
+	}
+
+	if len(m.Params) < 2 {
+		c.Write(s.Compose(errNoTextToSend.Error()))
+		return
+	}
+
+	text := m.Params[1]
+	names := strings.Split(m.Params[0], ",")
+	for _, name := range names {
+		_, rok := s.Rooms[name]
+		_, uok := s.Users[name]
+		if !(rok || uok) {
+			c.Write(s.Compose(errNoSuchUser.Error()))
+			return
+		}
+	}
+
+	for _, name := range names {
+		if target, ok := s.Users[name]; ok {
+			target.Write(c.Compose(text))
+			continue
+		}
+
+		if target, ok := s.Rooms[name]; ok {
+			target.Write(c.Compose(text))
+			continue
+		}
+	}
+}
+
+func join(s *Server, c *Client, m Message) {
+	if len(m.Params) < 1 {
+		c.Write(s.Compose(errNeedMoreParams.Error()))
+		return
+	}
+
+	names := strings.Split(m.Params[0], ",")
+	for _, name := range names {
+		if !RoomNameIsValid(name) {
+			c.Write(s.Compose(errNoSuchRoom.Error()))
+			return
+		}
+	}
+
+	for _, name := range names {
+		r := s.GetRoom(name)
+
+		if err := c.Join(r); err != nil {
+			c.Write(r.Compose(err.Error()))
+			s.DestroyIfEmpty(r)
+			continue
+		}
+
+		r.Write(r.Compose("Welcome to " + name + ", " + c.Name + "!"))
+	}
+}
+
+func channels(s *Server, c *Client, m Message) {
+	c.Write(s.Compose(strings.Join(s.RoomNames(), ", ")))
+}
+
+/*
+const cmds = "available commands: /help /who /channels /nick /join /leave /whoami /whois"
 
 func help(s *Server, r *Room, c *Client, args []string) {
 	c.Write(s.Compose(cmds))
@@ -125,3 +197,4 @@ func whois(s *Server, r *Room, c *Client, args []string) {
 
 	c.Write(s.Compose(stranger.WhoAmI()))
 }
+*/
