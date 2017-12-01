@@ -1,13 +1,12 @@
-# hi
+# Hi!
 
-A dead simple chat server and client without any external dependencies.
+Chat server and client based on a dead simple implementation by [hellerve]
+(https://github.com/hellerve/hi).
 
-The UI is inspired by material design, but comes without framework bloat.
-The entire page is about 19kb in size, without any minification.
+There __are__ bugs.
+Room destruction is broken now,
+I'll fix it as soon as I rewrite `Message` parsing.
 
-The server is written in Go and pretty fast. Also, it's dead-simple.
-
-There are probably bugs.
 
 ## Channels
 
@@ -25,15 +24,16 @@ Nothing is stored in a database. Everything is kept in memory, there
 is no history. That means that all knowledge and all communication is
 ephemeral, like at a party where you join and leave conversations as
 you please. Please use HTTPS when deploying this chat, preferably through
-nginx or any other web server.
+caddy or any other web server.
 
 ## Deployment
 
-This is where it gets tricky. If you know how to (cross-)compile Go programs
-and put them on your server and run it, deploying `hi` is as simple as compiling,
+This is where it gets tricky. If you know how to (cross-)compile Go programs and
+put them on your server and run it, deploying `hi` is as simple as compiling,
 e.g. with `GOOS=<os, probably linux> go build`, and copying the resulting binary
 and the public directory to a server, then letting it run. Letting it run could
-be more or less involved, depending on your hosting provider. I'll be glad to help.
+be more or less involved, depending on your hosting provider.
+I'll be glad to help.
 
 ## Running
 
@@ -41,20 +41,29 @@ The compiled program can be run without arguments (runs on port 8080) or with
 the port set (using the `-p` option). It assumes that the public directory is in
 the directory where the program is started.
 
+## Code style
+
+`Server`, `Room`, `Client` and `Message` types are abbreviated as `s`, `r`, `c`
+and `m` respectively.
+
+Tabs for indentation, spaces for alignment.
+
 ## Commands
 
 There are a few special commands that you can issue to interact with the server,
-IRC-style. All of these commands need to be sent to a channel that the user subscribes
-to.
+IRC-style. All of these commands need to be sent to a channel that the user
+subscribes to.
 
 ```
 /join <channelname>  # join a channel
 /leave <channelname> # leave a channel (will send back an error if user is not subscribed to the channel)
-/list                # list all users in the current channel
+/who                 # list all users in the current channel
 /channels            # list all channels
+/nick <username>     # change your nickname
+/whoami              # prints your nickname@remote_addr
+/whois <username>    # prints nickname@remote_addr for with that username
 ```
 
-
-<hr/>
+--------------------------------------------------------------------------------
 
 Have fun!
