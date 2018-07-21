@@ -7,18 +7,18 @@ import (
 )
 
 var (
-	addr = ":8081"
+	addr = ":8080"
 	router = &Router{}
 )
 
 func init() {
-	flag.StringVar(&addr,  "l", addr,  "bind to this addr")
+	flag.StringVar(&addr,  "l", addr,  "bind address")
 	flag.Parse()
+
+	router.Init()
 }
 
 func main() {
-	router.Init()
-
 	http.HandleFunc("/", wsHandler)
 
 	err := http.ListenAndServe(addr, nil)
