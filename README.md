@@ -1,12 +1,10 @@
 # Hi!
 
-Chat server and client based on a dead simple implementation by [hellerve]
-(https://github.com/hellerve/hi).
+A dead simple chat server and client without any external dependencies.
 
-There __are__ bugs.
-Room destruction is broken now,
-I'll fix it as soon as I rewrite `Message` parsing.
+## Bugs
 
+There are probably bugs.
 
 ## Channels
 
@@ -43,26 +41,28 @@ the directory where the program is started.
 
 ## Code style
 
-`Server`, `Room`, `Client` and `Message` types are abbreviated as `s`, `r`, `c`
-and `m` respectively.
+### Indentation
 
-Tabs for indentation, spaces for alignment.
+Tabs for indentation, no alignment.
 
-## Commands
+### Naming
 
-There are a few special commands that you can issue to interact with the server,
-IRC-style. All of these commands need to be sent to a channel that the user
-subscribes to.
+Use descriptive names for constants, types, functions and methods.  If possible,
+abbreviate variable names to the lowercase first letter of its type.
 
-```
-/join <channelname>  # join a channel
-/leave <channelname> # leave a channel (will send back an error if user is not subscribed to the channel)
-/who                 # list all users in the current channel
-/channels            # list all channels
-/nick <username>     # change your nickname
-/whoami              # prints your nickname@remote_addr
-/whois <username>    # prints nickname@remote_addr for with that username
-```
+## Credits
+
+Chat server was originally based on [hellerve/hi](https://github.com/hellerve/hi),
+but was rewritten from scratch.  Client is still based on the upstream.
+
+## License
+
+To the extent possible under law, the author(s) have dedicated all copyright and
+related and neighboring rights to this software to the public domain worldwide.
+This software is distributed without any warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication along with
+this software. If not, see [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 
 --------------------------------------------------------------------------------
 

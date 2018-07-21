@@ -100,4 +100,5 @@ body {
 
 #room {
   max-width: 10em;
+  visibility: none;
 }
