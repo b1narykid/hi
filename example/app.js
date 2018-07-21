@@ -39,7 +39,7 @@ function join() {
 			if(e.keyCode == 13) {
 				ws.send(JSON.stringify({
 					To: roomElement.value,
-					Data: {
+					Body: {
 						Text: sendElement.value,
 						From: nameElement.value,
 					}
@@ -55,12 +55,12 @@ function join() {
 
 			let k = document.createElement('span')
 			k.setAttribute('class', 'user')
-			k.appendChild(document.createTextNode(msg.Data.From))
+			k.appendChild(document.createTextNode(msg.Body.From))
 			node.appendChild(k)
 
 			let v = document.createElement('span')
 			v.setAttribute('class', 'message')
-			v.appendChild(document.createTextNode(msg.Data.Text))
+			v.appendChild(document.createTextNode(msg.Body.Text))
 			node.appendChild(v)
 
 			prependChild(msgsElement, node)
