@@ -13,10 +13,11 @@ func TestRouterInit(t *testing.T) {
 	}
 
 	if r.groups == nil {
-		t.Error("r.groups is nil")
+		t.Fatal("r.groups is nil")
 	}
+
 	if len(r.groups) > 0 {
-		t.Error("r.groups is not empty")
+		t.Fatal("r.groups is not empty")
 	}
 }
 
@@ -143,7 +144,16 @@ func TestRouterMessagePropogation(t *testing.T) {
 
 	for name, buffer := range expectedBuffers {
 		if !reflect.DeepEqual(clients[name].buf, buffer) {
-			t.Errorf("%s receive wrong message sequence", name)
+			t.Errorf("%s received wrong message sequence", name)
 		}
+	}
+}
+
+func TestRouterNestingPossible(t *testing.T) {
+	routerType := reflect.TypeOf((*Router)(nil))
+	clientInterface := reflect.TypeOf((*Client)(nil)).Elem()
+
+	if !routerType.Implements(clientInterface) {
+		t.Error("*Router does not implement Client interface")
 	}
 }
