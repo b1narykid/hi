@@ -1,16 +1,16 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"github.com/gorilla/websocket"
 )
 
-type wsConnClient struct {
+type wsClient struct {
 	*websocket.Conn
+	Path string
 }
 
-func (c *wsConnClient) Send(m *Message) {
+func (c *wsClient) Send(m *Message) {
 	c.WriteJSON(m)
 }
 
@@ -20,28 +20,22 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	defer ws.Close()
 
-	wsc := &wsConnClient{ws}
-	p := r.URL.Path
-	router.AddRoute(p, wsc)
-	defer router.DelRoute(p, wsc)
-
-	for {
-		m := &Message{}
-		if err := ws.ReadJSON(m); err != nil {
-			if isCloseError(err) {
-				log.Printf("error: " + err.Error())
-			}
-			break
-		}
-		router.Send(m)
-	}
+	go wsServe(router, &wsClient{
+		Conn: ws,
+		Path: r.URL.Path,
+	})
 }
 
-func isCloseError(e error) bool {
-	return !websocket.IsCloseError(e,
-		websocket.CloseNormalClosure,
-		websocket.CloseGoingAway,
-		websocket.CloseNoStatusReceived)
+func wsServe(r *Router, c *wsClient) {
+	r.AddRoute(c.Path, c)
+	for {
+		m := &Message{}
+		if err := c.ReadJSON(m); err != nil {
+			break
+		}
+		r.Send(m)
+	}
+	r.DelRoute(c.Path, c)
+	c.Close()
 }
