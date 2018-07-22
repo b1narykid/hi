@@ -18,7 +18,7 @@ function join() {
 	//let ws = new WebSocket('wss://example.com/chat/room/general')
 	let ws = new WebSocket('ws://localhost:8081/general')
 
-	window.addEventListener("beforeunload", function() {
+	window.addEventListener('beforeunload', function() {
 		ws.close()
 	})
 
